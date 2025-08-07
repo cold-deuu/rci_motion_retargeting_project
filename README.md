@@ -13,7 +13,15 @@ reference : https://github.com/ZhengyiLuo/PHC
 
 ---
 # Dependencies
+## Simulation
 [Issac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html)
+
+## OS
+Ubuntu 22.04
+Python 3.10
+
+## Python
+Use Conda Environment for IssacLab
 
 ---
 # Environment Unit Test
