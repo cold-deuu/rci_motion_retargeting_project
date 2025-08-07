@@ -1,4 +1,5 @@
 # RCI MOTION RETARGETING
+**PHC Implementation with Isaac Lab**
 
 reference : https://github.com/ZhengyiLuo/PHC
 
