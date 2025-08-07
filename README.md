@@ -13,8 +13,14 @@ reference : https://github.com/ZhengyiLuo/PHC
 ---
 # Environment Unit Test
 
+**Test Environment using gymnasium**
 ```
-"Hello, world!" cd ~/project python3 main.py
+python3 unit_test/test_gym.py
+```
+
+**Test Custom Environment with Python Config Class**
+```
+python3 unit_test/test_env.py
 ```
 
 
