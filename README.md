@@ -13,7 +13,9 @@ reference : https://github.com/ZhengyiLuo/PHC
 ---
 # Environment Unit Test
 
-```bash # 예시 echo "Hello, world!" cd ~/project python3 main.py ```
+```
+"Hello, world!" cd ~/project python3 main.py
+```
 
 
 ---
