@@ -1,0 +1,4 @@
+algo: ppo
+gamma: 0.99
+learning_rate: 3e-4
+clip_range: 0.2

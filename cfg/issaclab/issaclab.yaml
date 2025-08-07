@@ -1,0 +1,14 @@
+video: false
+video_length: 10
+video_interval: 10
+num_envs: 10
+task: 10
+seed: 100
+distributed: true
+checkpoint: "./learning_data"
+sigma: 0.3
+max_iteration: 50000
+wandb-project-name: "rci_lab"
+wandb-entity: "avatar"
+wandb-name: "phc_test"
+track: false

@@ -1,0 +1,14 @@
+defaults:
+  - _self_
+  # - env: h1_2_env
+  # - robot: h1_2
+  # - sim: default_sim
+  # - task: reach_target
+  - learning: ppo
+  - issaclab: issaclab
+
+project_name: "Isaac_H1_2"
+headless: true
+seed: 42
+output_path: ./output/${project_name}
+device: "cuda:0"
