@@ -12,6 +12,10 @@ reference : https://github.com/ZhengyiLuo/PHC
 </pre>
 
 ---
+# Dependencies
+[Issac Lab] (https://isaac-sim.github.io/IsaacLab/main/index.html)
+
+---
 # Environment Unit Test
 
 **Test Environment using gymnasium**
