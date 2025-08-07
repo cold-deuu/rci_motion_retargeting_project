@@ -13,7 +13,7 @@ reference : https://github.com/ZhengyiLuo/PHC
 
 ---
 # Dependencies
-[Issac Lab] (https://isaac-sim.github.io/IsaacLab/main/index.html)
+[Issac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html)
 
 ---
 # Environment Unit Test
