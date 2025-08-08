@@ -62,16 +62,6 @@ from robot.h1_cfg import H1_CFG
 from env.chan_task.humanoid_amp_env import HumanoidAmpEnv
 from env.chan_task.humanoid_amp_env_cfg import HumanoidAmpEnvCfg
 
-# PHC Learning
-from learning import im_amp
-from learning import im_amp_players
-from learning import amp_agent
-from learning import amp_players
-from learning import amp_models
-from learning import amp_network_builder
-from learning import amp_network_mcp_builder
-from learning import amp_network_pnn_builder
-
 # Torch
 import torch
 
@@ -99,31 +89,17 @@ from rl_games.torch_runner import Runner
 from isaaclab_rl.rl_games import RlGamesGpuEnv, RlGamesVecEnvWrapper
 
 
-def build_alg_runner(algo_observer):
-    runner = Runner(algo_observer)
-    runner.player_factory.register_builder('amp_discrete', lambda **kwargs: amp_players.AMPPlayerDiscrete(**kwargs))
-    
-    runner.algo_factory.register_builder('amp', lambda **kwargs: amp_agent.AMPAgent(**kwargs))
-    runner.player_factory.register_builder('amp', lambda **kwargs: amp_players.AMPPlayerContinuous(**kwargs))
-
-    runner.model_builder.model_factory.register_builder('amp', lambda network, **kwargs: amp_models.ModelAMPContinuous(network))
-    runner.model_builder.network_factory.register_builder('amp', lambda **kwargs: amp_network_builder.AMPBuilder())
-    runner.model_builder.network_factory.register_builder('amp_mcp', lambda **kwargs: amp_network_mcp_builder.AMPMCPBuilder())
-    runner.model_builder.network_factory.register_builder('amp_pnn', lambda **kwargs: amp_network_pnn_builder.AMPPNNBuilder())
-    
-    runner.algo_factory.register_builder('im_amp', lambda **kwargs: im_amp.IMAmpAgent(**kwargs))
-    runner.player_factory.register_builder('im_amp', lambda **kwargs: im_amp_players.IMAMPPlayerContinuous(**kwargs))
-    
-    return runner
 
 @hydra.main(
     version_base=None,
     config_path="./config",
-    config_name="phc_learning",
+    config_name="test_agent",
 )
 def main(cfg_hydra: DictConfig):
     # To Do 
     # 1. wandb
+    # 2. vector - env
+    # 3. agent_cfg -> runner
 
     agent_cfg = EasyDict(OmegaConf.to_container(cfg_hydra, resolve=True))
     agent_cfg["params"]["config"]["num_actors"] = args_cli.num_envs
@@ -159,7 +135,6 @@ def main(cfg_hydra: DictConfig):
 
     # create runner from rl-games
     runner = Runner(IsaacAlgoObserver())
-    runner = build_alg_runner(runner)
     runner.load(agent_cfg)
     runner.reset()
     runner.run({"train": True, "play": False, "sigma": train_sigma})

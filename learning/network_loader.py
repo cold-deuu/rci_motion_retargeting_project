@@ -1,12 +1,17 @@
+# OS PATH
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from phc.utils import torch_utils
+from utils import torch_utils
 
 from easydict import EasyDict as edict
-from phc.learning.vq_quantizer import EMAVectorQuantizer, Quantizer
-from phc.learning.pnn import PNN
+from vq_quantizer import EMAVectorQuantizer, Quantizer
+from pnn import PNN
 
 def load_mcp_mlp(checkpoint, activation = "relu", device = "cpu", mlp_name = "actor_mlp"):
     actvation_func = torch_utils.activation_facotry(activation)
