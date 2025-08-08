@@ -36,6 +36,10 @@ python3 unit_test/test_gym.py
 python3 unit_test/test_env.py
 ```
 
+**Test Runner-Environment Connection**
+```
+python3 unit_test/test_runner.py
+```
 
 ---
 
