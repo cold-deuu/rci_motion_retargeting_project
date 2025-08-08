@@ -86,7 +86,7 @@ def main():
     env_cfg.scene.num_envs = args_cli.num_envs
     env_cfg.sim.device = args_cli.device
     env_cfg.seed = args_cli.seed
-
+    
     gym.register(id="Custom-Humanoid-v0", entry_point="env.chan_task.humanoid_amp_env:HumanoidAmpEnv")
     env = gym.make("Custom-Humanoid-v0", cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
 

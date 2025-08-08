@@ -1,0 +1,93 @@
+#================================================================
+# Humanoid 강화를 위한 표준 PPO 알고리즘 설정 파일 예시
+#================================================================
+
+params:
+  # --- 기본 및 시드 설정 ---
+  seed: 42 # 실험 재현성을 위한 무작위 시드
+
+  # --- 알고리즘, 모델, 네트워크 종류 지정 ---
+  algo:
+    name: a2c_continuous # 알고리즘: 연속 행동 공간을 위한 A2C 계열 (PPO 포함)
+  
+  model:
+    name: continuous_a2c_logstd # 모델 아키텍처: 연속 행동 공간, A2C, 로그 표준편차 사용
+  
+  network:
+    name: actor_critic # 신경망 빌더: 표준적인 정책망(Actor)/가치망(Critic) 구조
+    separate: True # 정책망과 가치망을 별도 네트워크로 구성
+
+    space:
+      continuous:
+        mu_activation: None # 행동 분포의 평균(mu) 출력은 선형(linear)으로
+        sigma_activation: None # 행동 분포의 표준편차(sigma) 출력도 선형으로
+        mu_init:
+          name: default # mu 레이어 가중치 기본 초기화
+        sigma_init:
+          name: const_initializer # sigma는 상수로 초기화
+          val: 0 # 초기 표준편차를 1.0으로 설정 (log(1.0) = 0)
+        fixed_sigma: True # 모든 상태에 대해 표준편차 값을 고정
+        learn_sigma: False # 고정된 표준편차 값을 학습하지 않음
+
+    mlp: # 정책망/가치망의 MLP(다층 퍼셉트론) 구조
+      units: [512, 256, 128] # 은닉층 뉴런 수: 512 -> 256 -> 128
+      activation: elu # 활성화 함수: ELU (ReLU보다 부드러워 많이 사용됨)
+      initializer:
+        name: default # 가중치 기본 초기화
+
+  # --- 체크포인트 로드 설정 ---
+  load_checkpoint: False # 훈련 시작 시 체크포인트를 불러올지 여부
+
+  #================================================================
+  # 훈련 과정 전반에 대한 핵심 설정 (가장 중요)
+  #================================================================
+  config:
+    name: Custom-Humanoid-v0
+    env_name: rlgpu
+    device: 'cuda:0'
+    multi_gpu: False
+    ppo: True
+    mixed_precision: False
+    normalize_input: True
+    normalize_value: True
+    reward_shaper:
+      scale_value: 1
+    normalize_advantage: True
+    gamma: 0.99
+    tau: 0.95
+    learning_rate: 2e-5
+    lr_schedule: constant
+    score_to_win: 20000
+    max_epochs: 10000000
+    save_best_after: 100
+    save_frequency: 2500
+    print_stats: False
+    save_intermediate: True
+    entropy_coef: 0.0
+    truncate_grads: True
+    grad_norm: 50.0
+    e_clip: 0.2
+    horizon_length: 32
+    minibatch_size: 16384
+    mini_epochs: 6
+    critic_coef: 5
+    clip_value: False
+    
+    bounds_loss_coef: 10
+    amp_obs_demo_buffer_size: 200000
+    amp_replay_buffer_size: 200000
+    amp_replay_keep_prob: 0.01
+    amp_batch_size: 512
+    amp_minibatch_size: 4096
+    disc_coef: 5
+    disc_logit_reg: 0.01
+    disc_grad_penalty: 5
+    disc_reward_scale: 2
+    disc_weight_decay: 0.0001
+    normalize_amp_input: True
+
+    task_reward_w: 0.5
+    disc_reward_w: 0.5
+
+    player: 
+      games_num: 50000000

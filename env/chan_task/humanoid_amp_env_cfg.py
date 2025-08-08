@@ -28,11 +28,11 @@ class HumanoidAmpEnvCfg(DirectRLEnvCfg):
     decimation = 2
 
     # spaces
-    observation_space = 81
-    action_space = 28
+    observation_space = 50
+    action_space = 19
     state_space = 0
     num_amp_observations = 2
-    amp_observation_space = 81
+    amp_observation_space = 50
 
     early_termination = True
     termination_height = 0.5

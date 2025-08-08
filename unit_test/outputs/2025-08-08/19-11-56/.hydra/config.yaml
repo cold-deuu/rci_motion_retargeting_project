@@ -1,0 +1,59 @@
+params:
+  seed: 42
+  algo:
+    name: a2c_continuous
+  model:
+    name: continuous_a2c_logstd
+  network:
+    name: actor_critic
+    separate: true
+    space:
+      continuous:
+        mu_activation: None
+        sigma_activation: None
+        mu_init:
+          name: default
+        sigma_init:
+          name: const_initializer
+          val: 0
+        fixed_sigma: true
+        learn_sigma: false
+    mlp:
+      units:
+      - 512
+      - 256
+      - 128
+      activation: elu
+      initializer:
+        name: default
+  load_checkpoint: false
+  config:
+    name: Custom-Humanoid-v0
+    env_name: rlgpu
+    multi_gpu: false
+    device: cuda:0
+    reward_shaper:
+      scale_value: 1
+    ppo: true
+    normalize_input: true
+    normalize_value: true
+    normalize_advantage: true
+    gamma: 0.99
+    tau: 0.95
+    learning_rate: 0.0003
+    lr_schedule: linear
+    grad_norm: 1.0
+    e_clip: 0.2
+    entropy_coef: 0.01
+    critic_coef: 1.0
+    horizon_length: 32
+    num_actors: 4096
+    minibatch_size: 16384
+    mini_epochs: 8
+    bounds_loss_coef: 0.0001
+    max_epochs: 5000
+    save_frequency: 500
+    save_best_after: 200
+  player:
+    games_num: 100
+    deterministic: true
