@@ -42,4 +42,5 @@ python3 unit_test/test_env.py
 # To Do List
 - [ ] Humanoid AMP Env 
 - [ ] SMPL Motion Data Connect + Reward Code
-- [ ] rl_games learning code with hydra
+- [x] rl_games learning code with hydra - test
+- [ ] rl_games with learning code of PHC
