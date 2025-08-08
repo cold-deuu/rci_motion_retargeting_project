@@ -48,7 +48,6 @@ import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
 
-
 from omni.isaac.core import World
 from omni.isaac.lab.sim import SimulationContext
 

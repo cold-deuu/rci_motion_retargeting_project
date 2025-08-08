@@ -29,7 +29,6 @@ from env.chan_task.humanoid_amp_env import HumanoidAmpEnv
 from env.chan_task.humanoid_amp_env_cfg import HumanoidAmpEnvCfg
 
 
-
 # Torch
 import torch
 
