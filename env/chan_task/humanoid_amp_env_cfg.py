@@ -25,7 +25,7 @@ class HumanoidAmpEnvCfg(DirectRLEnvCfg):
 
     # env
     episode_length_s = 10.0
-    decimation = 2
+    decimation = 2 # config 랑 동일
 
     # spaces
     observation_space = 50
@@ -70,6 +70,15 @@ class HumanoidAmpEnvCfg(DirectRLEnvCfg):
             ),
         },
     )
+
+    # Chan
+    # 250810 Code
+    # Isaac Lab to Gym
+    # device_type = "cpu"
+    # device_id = 0
+    # device = "cpu"
+    is_discrete = "False"
+
 
 
 # @configclass

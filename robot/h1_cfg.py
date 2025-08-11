@@ -16,7 +16,7 @@ H1_CFG = ArticulationCfg(
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
             enabled_self_collisions=True,
-            solver_position_iteration_count=4,
+            solver_position_iteration_count=4, # 물리엔진 세팅으로 보임 Default = 4, 값이 클수록 로봇의 떨림이 줄어들거나 정밀한 움직임. 컴퓨테이션 이 커짐 대신
             solver_velocity_iteration_count=0,
             sleep_threshold=0.005,
             stabilization_threshold=0.001,

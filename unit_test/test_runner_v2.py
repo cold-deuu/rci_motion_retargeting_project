@@ -93,7 +93,7 @@ from isaaclab_rl.rl_games import RlGamesGpuEnv, RlGamesVecEnvWrapper
 @hydra.main(
     version_base=None,
     config_path="./config",
-    config_name="test_agent",
+    config_name="phc_test",
 )
 def main(cfg_hydra: DictConfig):
     # To Do 
@@ -108,7 +108,12 @@ def main(cfg_hydra: DictConfig):
     env_name = agent_cfg["params"]["config"]["name"]
 
     # read configurations about the agent-training
-    rl_device = agent_cfg["params"]["config"]["device"]
+    device_type = agent_cfg["params"]["config"]["device"]
+    device_id = agent_cfg["params"]["config"]["device_id"]
+    rl_device = "cpu"
+    if device_type == "cuda" or device_type == "GPU":
+        rl_device = "cuda" + f":{device_id}"
+
     # clip_obs = agent_cfg["params"]["env"].get("clip_observations", math.inf)
     # clip_actions = agent_cfg["params"]["env"].get("clip_actions", math.inf)
     clip_obs = 5.0
@@ -118,10 +123,12 @@ def main(cfg_hydra: DictConfig):
     # Env Cfg : Custom
     env_cfg = HumanoidAmpEnvCfg()
     env_cfg.scene.num_envs = args_cli.num_envs
+    # env_cfg.sim.device = args_cli.device
     env_cfg.sim.device = rl_device
     env_cfg.seed = args_cli.seed
-    env_cfg.device = rl_device
+    # env_cfg.device = rl_device # env.device = env_cfg.sim.device
 
+    
     train_sigma = float(args_cli.sigma) if args_cli.sigma is not None else None
 
 
