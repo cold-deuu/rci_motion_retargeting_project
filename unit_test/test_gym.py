@@ -103,6 +103,8 @@ def main():
                 print("[INFO]: Resetting environment...")
             # sample random actions
             joint_efforts = torch.randn(env.unwrapped.num_envs, env.unwrapped.robot.data.joint_pos.shape[1], device=env.unwrapped.sim.device)
+            # effort = torch.zeros_like(joint_efforts)
+
             # step the environment
             obs_buf, reward_buf, reset_terminated, reset_time_outs, extras = env.step(joint_efforts)
             # print current orientation of pole

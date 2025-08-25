@@ -38,7 +38,7 @@ class HumanoidAmpEnvCfg(DirectRLEnvCfg):
     termination_height = 0.5
 
     # motion_file: str = MISSING
-    reference_body = "torso_link"
+    reference_body = "pelvis"
     reset_strategy = "random"  # default, random, random-start
     """Strategy to be followed when resetting each environment (humanoid's pose and joint states).
 

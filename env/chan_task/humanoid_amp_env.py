@@ -1,8 +1,19 @@
+# Code for Making RL Environments : Humanoid Imitation
+# Author : cold-deuu
 from __future__ import annotations
+
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"../..")))
+
 
 import gymnasium as gym
 import numpy as np
+
+# Torch
 import torch
+from torch_utils import torch_utils
+from torch_utils.gym_utils import *
 
 import isaaclab.sim as sim_utils
 from isaaclab.assets import Articulation
@@ -33,11 +44,12 @@ class HumanoidAmpEnv(DirectRLEnv):
         
         # DOF and key body indexes
         # Key Body Name 수정 
-        key_body_names = ["right_elbow_link", "left_elbow_link", "right_ankle_link", "left_ankle_link"]
+        key_body_names = ["pelvis","right_elbow_link", "left_elbow_link", "right_ankle_link", "left_ankle_link"]
 
 
         # Data 상에 있는 Reference Body 의 인덱스를 가져옴
-        # self.ref_body_index = self.robot.data.body_names.index(self.cfg.reference_body)
+        # H1 : Pelvis Link Index
+        self.ref_body_index = self.robot.data.body_names.index(self.cfg.reference_body)
 
         # Data 상에 있는 Key Body 의 인덱스를 가져옴
         self.key_body_indexes = [self.robot.data.body_names.index(name) for name in key_body_names]
@@ -90,16 +102,43 @@ class HumanoidAmpEnv(DirectRLEnv):
         self.robot.set_joint_position_target(target)
 
     def _get_observations(self) -> dict:
-        # build task observation
-        obs = compute_obs(
-            self.robot.data.joint_pos,
-            self.robot.data.joint_vel,
-            # self.robot.data.body_pos_w[:, self.ref_body_index],
-            # self.robot.data.body_quat_w[:, self.ref_body_index],
-            # self.robot.data.body_lin_vel_w[:, self.ref_body_index],
-            # self.robot.data.body_ang_vel_w[:, self.ref_body_index],
-            self.robot.data.body_pos_w[:, self.key_body_indexes],
-        )
+        # build task observation : Default
+        # obs = compute_obs(
+        #     self.robot.data.joint_pos,
+        #     self.robot.data.joint_vel,
+        #     # self.robot.data.body_pos_w[:, self.ref_body_index],
+        #     # self.robot.data.body_quat_w[:, self.ref_body_index],
+        #     # self.robot.data.body_lin_vel_w[:, self.ref_body_index],
+        #     # self.robot.data.body_ang_vel_w[:, self.ref_body_index],
+        #     self.robot.data.body_pos_w[:, self.key_body_indexes],
+        # )
+
+        # Compute Observation (2025.08.25)
+        # Editor : cold-deuu
+        # 여기 ... 에서 문제생김
+        # Pos 
+        root_pos_w = self.robot.data.body_pos_w[..., self.ref_body_index] # Root
+        kp_pos_w = self.robot.data.body_pos_w[..., self.key_body_indexes] # Key-Point
+        
+        # Rot
+        root_quat_w = self.robot.data.body_quat_w[..., self.ref_body_index] # Root   
+        kp_quat_w = self.robot.data.body_quat_w[..., self.key_body_indexes] # Key-Point
+
+        # Linear Velocity
+        root_linvel_w = self.robot.body_lin_vel_w[..., self.ref_body_index] # Root
+        kp_linvel_w = self.robot.body_lin_vel_w[..., self.key_body_indexes] # Key-Point
+
+        # Angular Velocity
+        root_angvel_w = self.robot.body_ang_vel_w[..., self.ref_body_index] # Root
+        kp_angvel_w = self.robot.body_ang_vel_w[..., self.key_body_indexes] # Key-Point
+
+        root_param = {"pos" : root_pos_w, "quat" : root_quat_w, "linvel" : root_linvel_w, "angvel" : root_angvel_w}
+        kp_param = {"pos" : kp_pos_w, "quat" : kp_quat_w, "linvel" : kp_linvel_w, "angvel" : kp_angvel_w}
+        # obs = compute_self_obs(root_param, kp_param) # (B, 3*4 + 4*5 + 3*5 + 3*5 + 1) --> B, 63
+        obs = compute_self_obs(root_pos_w, root_quat_w, kp_pos_w, kp_quat_w, kp_linvel_w, kp_angvel_w) # (B, 3*4 + 4*5 + 3*5 + 3*5 + 1) --> B, 63
+
+
+
 
         # Motion
         # # update AMP observation history
@@ -108,6 +147,21 @@ class HumanoidAmpEnv(DirectRLEnv):
         # # build AMP observation
         # self.amp_observation_buffer[:, 0] = obs.clone()
         # self.extras = {"amp_obs": self.amp_observation_buffer.view(-1, self.amp_observation_size)}
+
+
+        # Logger
+        # print(f"[Chan_Logger] Body Pos Data : {self.robot.data.body_pos_w[:, self.ref_body_index]}")
+        # print(f"[Chan_Logger] Body Pos Shape : {(self.robot.data.body_pos_w[:, self.ref_body_index]).shape}") # B, num_ref, 3 (Expect) -> B, 1, 3 --> B, 3
+        # print(f"[Chan_Logger] Body Rot Data : {self.robot.data.body_quat_w[:, self.ref_body_index]}")
+        # print(f"[Chan_Logger] Body Rot Shape : {(self.robot.data.body_quat_w[:, self.ref_body_index]).shape}") # B, num_ref, 4 (Expect) -> B, 1, 4 --> B, 4
+        # print(f"[Chan_Logger] Body Pos Data : {self.robot.data.body_pos_w[:, self.key_body_indexes]}")
+        # print(f"[Chan_Logger] Body Pos Shape : {(self.robot.data.body_pos_w[:, self.key_body_indexes]).shape}") # B, num_ref, 3
+        # print(f"[Chan_Logger] Body Rot Data : {self.robot.data.body_quat_w[:, self.key_body_indexes]}")
+        # print(f"[Chan_Logger] Body Rot Shape : {(self.robot.data.body_quat_w[:, self.key_body_indexes]).shape}") # B, num_ref, 4
+        print(f"[Chan_Logger] Obs Shape :{obs.shape}") # 1(B), 298
+
+        
+
 
         return {"policy": obs}
 
@@ -252,4 +306,127 @@ def compute_obs(
         ),
         dim=-1,
     )
+    return obs
+
+# PHC
+# @torch.jit.script
+def compute_self_obs_v2(root_param, kp_param):
+    root_pos_w = root_param["pos"] # B,3
+    root_quat_w = root_param["quat"] # B,4
+    
+    kp_pos_w = kp_param["pos"] # B,J,3
+    kp_quat_w = kp_param["quat"] # B,J,4
+    kp_linvel_w = kp_param["linvel"] # B,J,3
+    kp_angvel_w = kp_param["angvel"] # B,J,3
+    
+    # Param
+    num_env, num_kp, _ = kp_pos_w.shape
+
+    root_h = root_pos_w[...,2]
+    heading_quat_inv = torch_utils.calc_heading_quat_inv(root_quat_w)
+    # print(f"Heading Quat Inv : {heading_quat_inv}") # 1,4
+    heading_quat_inv_expand = heading_quat_inv.unsqueeze(1).repeat((1,kp_pos_w.shape[1],1))
+    
+    # (B,J,3) - (B,3)
+    local_body_pos = kp_pos_w - root_pos_w
+
+    # local_body_pos : (B,J,3)
+    # heading_quat_inv_expand : (B,J,4)
+    flat_local_body_pos = local_body_pos.reshape(local_body_pos.shape[0] * local_body_pos.shape[1], -1)
+    flat_heading_quat_inv = heading_quat_inv_expand.reshape(heading_quat_inv_expand.shape[0] * heading_quat_inv_expand.shape[1], -1)
+    local_body_pos_obs = torch_utils.my_quat_rotate(flat_heading_quat_inv, flat_local_body_pos)
+    
+    local_body_pos_obs = local_body_pos_obs.reshape(local_body_pos.shape[0], local_body_pos.shape[1]*3) # 1, 20*3
+    local_body_pos_obs = local_body_pos_obs[...,3:].clone() # Root Link 제외
+    # print(f"local_body_pos_obs :{local_body_pos_obs.shape}") # 1(B), 57
+
+    # local_body_rot = quat_mul(heading_quat_inv, self.link_pose_tensor[...,3:])
+    # local_body_rot_obs = torch_utils.quat_to_tan_norm(local_body_rot).view(B, time_steps, self.link_pose_tensor.shape[0] * 6)
+
+    body_rot = kp_quat_w
+    flat_body_rot = body_rot.reshape(body_rot.shape[0] * body_rot.shape[1], body_rot.shape[2])  # This is global rotation of the body
+    flat_local_body_rot = quat_mul(flat_heading_quat_inv, flat_body_rot)
+    flat_local_body_rot_obs = torch_utils.quat_to_tan_norm(flat_local_body_rot)
+
+    local_body_rot_obs = flat_local_body_rot_obs.reshape(body_rot.shape[0], body_rot.shape[1] * flat_local_body_rot_obs.shape[1])
+    # print(f"local_body_rot_obs :{local_body_rot_obs.shape}") # 1(B), 6*20
+
+    body_vel = kp_linvel_w
+    body_ang_vel = kp_angvel_w
+
+    flat_body_vel = body_vel.reshape(body_vel.shape[0] * body_vel.shape[1], body_vel.shape[2])
+    flat_local_body_vel = torch_utils.my_quat_rotate(flat_heading_quat_inv, flat_body_vel)
+    local_body_vel = flat_local_body_vel.reshape(body_vel.shape[0], body_vel.shape[1] * body_vel.shape[2])
+    # print(f"local_body_vel :{local_body_vel.shape}") # 1(B), 57
+
+    flat_body_ang_vel = body_ang_vel.reshape(body_ang_vel.shape[0] * body_ang_vel.shape[1], body_ang_vel.shape[2])
+    flat_local_body_ang_vel = torch_utils.my_quat_rotate(flat_heading_quat_inv, flat_body_ang_vel)
+    local_body_ang_vel = flat_local_body_ang_vel.reshape(body_ang_vel.shape[0], body_ang_vel.shape[1] * body_ang_vel.shape[2])
+    # print(f"local_body_ang_vel :{local_body_ang_vel.shape}") # 1(B), 57
+
+
+    # return tensor : batch_size, --
+    obs = torch.cat([root_h, local_body_pos_obs, local_body_rot_obs, local_body_vel, local_body_ang_vel], dim=-1)
+
+    return obs
+
+@torch.jit.script
+def compute_self_obs(root_pos : torch.Tensor, root_quat : torch.Tensor, kp_pos : torch.Tensor, kp_quat : torch.Tensor, kp_vel : torch.Tensor, kp_angvel : torch.Tensor):
+    root_pos_w = root_pos # B,3
+    root_quat_w = root_quat # B,4
+    
+    kp_pos_w = kp_pos["pos"] # B,J,3
+    kp_quat_w = kp_quat["quat"] # B,J,4
+    kp_linvel_w = kp_vel["linvel"] # B,J,3
+    kp_angvel_w = kp_angvel["angvel"] # B,J,3
+    
+    # Param
+    num_env, num_kp, _ = kp_pos_w.shape
+
+    root_h = root_pos_w[...,2]
+    heading_quat_inv = torch_utils.calc_heading_quat_inv(root_quat_w)
+    # print(f"Heading Quat Inv : {heading_quat_inv}") # 1,4
+    heading_quat_inv_expand = heading_quat_inv.unsqueeze(1).repeat((1,kp_pos_w.shape[1],1))
+    
+    # (B,J,3) - (B,3)
+    local_body_pos = kp_pos_w - root_pos_w
+
+    # local_body_pos : (B,J,3)
+    # heading_quat_inv_expand : (B,J,4)
+    flat_local_body_pos = local_body_pos.reshape(local_body_pos.shape[0] * local_body_pos.shape[1], -1)
+    flat_heading_quat_inv = heading_quat_inv_expand.reshape(heading_quat_inv_expand.shape[0] * heading_quat_inv_expand.shape[1], -1)
+    local_body_pos_obs = torch_utils.my_quat_rotate(flat_heading_quat_inv, flat_local_body_pos)
+    
+    local_body_pos_obs = local_body_pos_obs.reshape(local_body_pos.shape[0], local_body_pos.shape[1]*3) # 1, 20*3
+    local_body_pos_obs = local_body_pos_obs[...,3:].clone() # Root Link 제외
+    # print(f"local_body_pos_obs :{local_body_pos_obs.shape}") # 1(B), 57
+
+    # local_body_rot = quat_mul(heading_quat_inv, self.link_pose_tensor[...,3:])
+    # local_body_rot_obs = torch_utils.quat_to_tan_norm(local_body_rot).view(B, time_steps, self.link_pose_tensor.shape[0] * 6)
+
+    body_rot = kp_quat_w
+    flat_body_rot = body_rot.reshape(body_rot.shape[0] * body_rot.shape[1], body_rot.shape[2])  # This is global rotation of the body
+    flat_local_body_rot = quat_mul(flat_heading_quat_inv, flat_body_rot)
+    flat_local_body_rot_obs = torch_utils.quat_to_tan_norm(flat_local_body_rot)
+
+    local_body_rot_obs = flat_local_body_rot_obs.reshape(body_rot.shape[0], body_rot.shape[1] * flat_local_body_rot_obs.shape[1])
+    # print(f"local_body_rot_obs :{local_body_rot_obs.shape}") # 1(B), 6*20
+
+    body_vel = kp_linvel_w
+    body_ang_vel = kp_angvel_w
+
+    flat_body_vel = body_vel.reshape(body_vel.shape[0] * body_vel.shape[1], body_vel.shape[2])
+    flat_local_body_vel = torch_utils.my_quat_rotate(flat_heading_quat_inv, flat_body_vel)
+    local_body_vel = flat_local_body_vel.reshape(body_vel.shape[0], body_vel.shape[1] * body_vel.shape[2])
+    # print(f"local_body_vel :{local_body_vel.shape}") # 1(B), 57
+
+    flat_body_ang_vel = body_ang_vel.reshape(body_ang_vel.shape[0] * body_ang_vel.shape[1], body_ang_vel.shape[2])
+    flat_local_body_ang_vel = torch_utils.my_quat_rotate(flat_heading_quat_inv, flat_body_ang_vel)
+    local_body_ang_vel = flat_local_body_ang_vel.reshape(body_ang_vel.shape[0], body_ang_vel.shape[1] * body_ang_vel.shape[2])
+    # print(f"local_body_ang_vel :{local_body_ang_vel.shape}") # 1(B), 57
+
+
+    # return tensor : batch_size, --
+    obs = torch.cat([root_h, local_body_pos_obs, local_body_rot_obs, local_body_vel, local_body_ang_vel], dim=-1)
+
     return obs
