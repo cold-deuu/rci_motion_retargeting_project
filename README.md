@@ -47,3 +47,12 @@ python3 unit_test/test_env.py
 - [ ] Humanoid Env - Reward Code and Test
 - [ ] Learning     - Write To Do List
 - [x] rl_games learning code with hydra - test
+
+---
+# Change Log
+
+## [2025-08-26]
+### Added
+- Self Observation Code (ref. PHC)
+  
+
