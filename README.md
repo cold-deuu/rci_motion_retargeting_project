@@ -40,7 +40,10 @@ python3 unit_test/test_env.py
 ---
 
 # To Do List
-- [ ] Humanoid AMP Env 
-- [ ] SMPL Motion Data Connect + Reward Code
+- [x] Humanoid Env - phc obs 1 : compute-self-obs
+- [ ] Humanoid Env - phc obs 2 : compute-ref-obs // Due : 2025.09.03 : Already Write
+- [ ] Humanoid Env - Motion Loading --> IssacLab // Due : 2025.09.02
+- [ ] Humanoid Env - Reset Code and Test  // Due : 2025.09.04
+- [ ] Humanoid Env - Reward Code and Test
+- [ ] Learning     - Write To Do List
 - [x] rl_games learning code with hydra - test
-- [ ] rl_games with learning code of PHC
